@@ -87,18 +87,34 @@ class SortAndSendNovelResultsTool(FunctionTool[AstrAgentContext]):
         "将小说搜索/推荐等工具返回的结果整理为HTML卡片格式。"
         "自动按收藏数从高到低排序，自动处理标签URL转义。"
         "使用方法：将其他小说工具返回的结果JSON序列化后作为novels_json参数传入，"
-        "将返回值直接发送给用户即可。"
+        "工具会自动将HTML卡片发送给用户，无需再手动发送。"
     )
     parameters: dict = Field(
         default_factory=lambda: SortAndSendNovelResultsParams.model_json_schema()
     )
+
+    def _get_event(self, context):
+        try:
+            agent_context = context.context if hasattr(context, "context") else context
+            if hasattr(context, "event") and context.event:
+                return context.event
+            elif hasattr(agent_context, "event") and agent_context.event:
+                return agent_context.event
+        except Exception:
+            pass
+        return None
 
     async def call(
         self, context: ContextWrapper[AstrAgentContext], **kwargs
     ) -> ToolExecResult:
         try:
             params = SortAndSendNovelResultsParams(**kwargs)
-            return await sort_and_send_novel_results(params)
+            html_result = await sort_and_send_novel_results(params)
+            event = self._get_event(context)
+            if event and hasattr(event, "send"):
+                await event.send(event.plain_result(html_result))
+                return "已将格式化的小说 HTML 卡片结果直接发送给用户。"
+            return html_result
         except Exception as e:
             logger.error(f"格式化小说结果失败: {e}")
             return f"格式化小说结果失败: {str(e)}"
@@ -113,11 +129,22 @@ class PixivSearchNovelAndSendTool(FunctionTool[AstrAgentContext]):
     description: str = (
         "搜索Pixiv小说并直接输出格式化的HTML卡片。"
         "合并了搜索与格式化步骤，自动按收藏数排序并截取前N个结果。"
-        "将返回值直接发送给用户即可。"
+        "工具会自动将HTML卡片发送给用户，无需再手动发送。"
     )
     parameters: dict = Field(
         default_factory=lambda: SearchNovelAndSendParams.model_json_schema()
     )
+
+    def _get_event(self, context):
+        try:
+            agent_context = context.context if hasattr(context, "context") else context
+            if hasattr(context, "event") and context.event:
+                return context.event
+            elif hasattr(agent_context, "event") and agent_context.event:
+                return agent_context.event
+        except Exception:
+            pass
+        return None
 
     async def call(
         self, context: ContextWrapper[AstrAgentContext], **kwargs
@@ -125,7 +152,12 @@ class PixivSearchNovelAndSendTool(FunctionTool[AstrAgentContext]):
         try:
             api = self.api_manager.get_api()
             params = SearchNovelAndSendParams(**kwargs)
-            return await search_novel_and_send(api, params)
+            html_result = await search_novel_and_send(api, params)
+            event = self._get_event(context)
+            if event and hasattr(event, "send"):
+                await event.send(event.plain_result(html_result))
+                return f"已搜索关键词「{params.word}」并将 HTML 卡片结果直接发送给用户。"
+            return html_result
         except Exception as e:
             logger.error(f"搜索小说并格式化失败: {e}")
             return f"搜索小说并格式化失败: {str(e)}"
@@ -140,11 +172,22 @@ class PixivNovelRecommendedAndSendTool(FunctionTool[AstrAgentContext]):
     description: str = (
         "获取系统推荐小说并直接输出格式化的HTML卡片。"
         "合并了推荐获取与格式化步骤，自动按收藏数排序并截取前N个结果。"
-        "将返回值直接发送给用户即可。"
+        "工具会自动将HTML卡片发送给用户，无需再手动发送。"
     )
     parameters: dict = Field(
         default_factory=lambda: NovelRecommendedAndSendParams.model_json_schema()
     )
+
+    def _get_event(self, context):
+        try:
+            agent_context = context.context if hasattr(context, "context") else context
+            if hasattr(context, "event") and context.event:
+                return context.event
+            elif hasattr(agent_context, "event") and agent_context.event:
+                return agent_context.event
+        except Exception:
+            pass
+        return None
 
     async def call(
         self, context: ContextWrapper[AstrAgentContext], **kwargs
@@ -152,7 +195,12 @@ class PixivNovelRecommendedAndSendTool(FunctionTool[AstrAgentContext]):
         try:
             api = self.api_manager.get_api()
             params = NovelRecommendedAndSendParams(**kwargs)
-            return await novel_recommended_and_send(api, params)
+            html_result = await novel_recommended_and_send(api, params)
+            event = self._get_event(context)
+            if event and hasattr(event, "send"):
+                await event.send(event.plain_result(html_result))
+                return "已将推荐小说的 HTML 卡片结果直接发送给用户。"
+            return html_result
         except Exception as e:
             logger.error(f"获取推荐小说并格式化失败: {e}")
             return f"获取推荐小说并格式化失败: {str(e)}"
