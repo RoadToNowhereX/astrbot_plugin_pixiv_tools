@@ -1,0 +1,10 @@
+{
+    "refresh_token": {
+        "description": "Pixiv Refresh Token",
+        "type": "string",
+        "hint": "用于 Pixiv API 认证。获取方法请参考 pixiv-api 文档或网络教程。",
+        "default": "",
+        "is_sensitive": true,
+        "required": true
+    }
+}

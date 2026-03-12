@@ -1,24 +1,46 @@
-from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
-from astrbot.api.star import Context, Star, register
+from typing import Dict, Any
+
+from astrbot.api.star import Context, Star
 from astrbot.api import logger
 
-@register("helloworld", "YourName", "一个简单的 Hello World 插件", "1.0.0")
-class MyPlugin(Star):
-    def __init__(self, context: Context):
+from .pixiv_tools.api import PixivApiManager
+from .pixiv_tools.llm_tools import create_pixiv_novel_tools
+
+
+class PixivToolsPlugin(Star):
+    """
+    AstrBot 插件，提供 Pixiv 小说搜索、推荐、格式化等 LLM 工具。
+    配置通过 AstrBot WebUI 进行管理。
+    """
+
+    def __init__(self, context: Context, config: Dict[str, Any]):
         super().__init__(context)
+        self.config = config
+        self.api_manager = None
+        self.llm_tools = []
 
     async def initialize(self):
-        """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
+        """异步初始化：读取配置、创建 API 管理器、注册 LLM 工具"""
+        refresh_token = self.config.get("refresh_token", "")
+        if not refresh_token:
+            logger.warning(
+                "Pixiv Tools 插件：refresh_token 未配置，请在插件设置中填写。"
+            )
+            return
 
-    # 注册指令的装饰器。指令名为 helloworld。注册成功后，发送 `/helloworld` 就会触发这个指令，并回复 `你好, {user_name}!`
-    @filter.command("helloworld")
-    async def helloworld(self, event: AstrMessageEvent):
-        """这是一个 hello world 指令""" # 这是 handler 的描述，将会被解析方便用户了解插件内容。建议填写。
-        user_name = event.get_sender_name()
-        message_str = event.message_str # 用户发的纯文本消息字符串
-        message_chain = event.get_messages() # 用户所发的消息的消息链 # from astrbot.api.message_components import *
-        logger.info(message_chain)
-        yield event.plain_result(f"Hello, {user_name}, 你发了 {message_str}!") # 发送一条纯文本消息
+        # 初始化 API 管理器
+        self.api_manager = PixivApiManager(refresh_token)
+
+        # 创建并注册 LLM 工具
+        self.llm_tools = create_pixiv_novel_tools(self.api_manager)
+        try:
+            self.context.add_llm_tools(*self.llm_tools)
+            logger.info(
+                f"Pixiv Tools 插件：已注册 {len(self.llm_tools)} 个 LLM 工具。"
+            )
+        except Exception as e:
+            logger.error(f"Pixiv Tools 插件：注册 LLM 工具失败 - {e}")
 
     async def terminate(self):
-        """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
+        """插件停用时的清理"""
+        logger.info("Pixiv Tools 插件已停用。")
