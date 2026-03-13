@@ -52,11 +52,18 @@ class PixivApiManager:
                     )
                     continue
 
-                # 确保 API 实例已存在
+                # 确保 API 实例已存在，若未初始化则自动创建并认证
                 if self._api is None:
-                    logger.warning(
-                        "Pixiv Token 刷新任务：API 实例尚未初始化，跳过本次刷新。"
+                    logger.info(
+                        "Pixiv Token 刷新任务：API 实例尚未初始化，尝试创建并认证..."
                     )
+                    try:
+                        self.get_api()
+                        logger.info("Pixiv Token 刷新任务：API 实例初始化并认证成功。")
+                    except Exception as init_e:
+                        logger.error(
+                            f"Pixiv Token 刷新任务：API 实例初始化失败 - {type(init_e).__name__}: {init_e}"
+                        )
                     continue
 
                 logger.info("Pixiv Token 刷新任务：尝试使用 Refresh Token 进行认证...")
