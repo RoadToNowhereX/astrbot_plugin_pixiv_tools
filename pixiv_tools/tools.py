@@ -20,13 +20,13 @@ class SearchNovelParams(BaseModel):
         description="搜索类型: partial_match_for_tags(标签部分匹配), exact_match_for_tags(标签完全匹配), text(正文), keyword(关键词)"
     )
     sort: str = Field(default="date_desc", description="排序方式: date_desc(最新), date_asc(最旧)")
-    start_date: Optional[str] = Field(default=None, description="开始日期，格式: YYYY-MM-DD")
-    end_date: Optional[str] = Field(default=None, description="结束日期，格式: YYYY-MM-DD")
-    limit: int = Field(default=10, description="返回结果数量限制", ge=1, le=30)
+    start_date: Optional[str] = Field(default=None, description="开始日期，格式为: YYYY-MM-DD")
+    end_date: Optional[str] = Field(default=None, description="结束日期，格式为: YYYY-MM-DD")
+    count: int = Field(default=20, description="返回结果数，默认为20", ge=1, le=100)
 
 
 class NovelRecommendedParams(BaseModel):
-    limit: int = Field(default=10, description="返回结果数量限制", ge=1, le=30)
+    count: int = Field(default=20, description="返回结果数，默认为20", ge=1, le=100)
 
 
 class SortAndSendNovelResultsParams(BaseModel):
@@ -44,16 +44,16 @@ class SearchNovelAndSendParams(BaseModel):
         description="搜索类型: partial_match_for_tags(标签部分匹配), exact_match_for_tags(标签完全匹配), text(正文), keyword(关键词)"
     )
     sort: str = Field(default="date_desc", description="排序方式: date_desc(最新), date_asc(最旧)")
-    start_date: Optional[str] = Field(default=None, description="开始日期，格式: YYYY-MM-DD")
-    end_date: Optional[str] = Field(default=None, description="结束日期，格式: YYYY-MM-DD")
-    limit: int = Field(default=30, description="从API获取的结果数量限制", ge=1, le=30)
+    start_date: Optional[str] = Field(default=None, description="开始日期，格式为: YYYY-MM-DD")
+    end_date: Optional[str] = Field(default=None, description="结束日期，格式为: YYYY-MM-DD")
+    count: int = Field(default=20, description="从API获取的结果数，默认为20", ge=1, le=100)
     sort_by_bookmarks: bool = Field(default=True, description="是否按收藏数从高到低排序，默认为True")
     top_n: int = Field(default=20, description="排序后最多显示的结果数量，默认为20", ge=1)
 
 
 class NovelRecommendedAndSendParams(BaseModel):
     """获取推荐小说并直接格式化为HTML卡片"""
-    limit: int = Field(default=30, description="从API获取的结果数量限制", ge=1, le=30)
+    count: int = Field(default=20, description="从API获取的结果数，默认为20", ge=1, le=100)
     sort_by_bookmarks: bool = Field(default=True, description="是否按收藏数从高到低排序，默认为True")
     top_n: int = Field(default=20, description="排序后最多显示的结果数量，默认为20", ge=1)
 
@@ -179,7 +179,7 @@ async def search_novel(api: AppPixivAPI, params: SearchNovelParams) -> List[Dict
         if not hasattr(result, 'novels') or not result.novels:
             return []
 
-        return [_parse_novel(novel) for novel in result.novels[:params.limit]]
+        return [_parse_novel(novel) for novel in result.novels[:params.count]]
 
     except Exception as e:
         raise Exception(f"搜索小说失败: {str(e)}")
@@ -193,7 +193,7 @@ async def novel_recommended(api: AppPixivAPI, params: NovelRecommendedParams) ->
         if not hasattr(result, 'novels') or not result.novels:
             return []
 
-        return [_parse_novel(novel) for novel in result.novels[:params.limit]]
+        return [_parse_novel(novel) for novel in result.novels[:params.count]]
 
     except Exception as e:
         raise Exception(f"获取推荐小说失败: {str(e)}")
@@ -227,7 +227,7 @@ async def search_novel_and_send(api: AppPixivAPI, params: SearchNovelAndSendPara
         if not hasattr(result, 'novels') or not result.novels:
             return "没有找到小说结果。"
 
-        novels = [_parse_novel(novel) for novel in result.novels[:params.limit]]
+        novels = [_parse_novel(novel) for novel in result.novels[:params.count]]
         return _render_novel_cards(novels, params.sort_by_bookmarks, params.top_n)
 
     except Exception as e:
@@ -242,7 +242,7 @@ async def novel_recommended_and_send(api: AppPixivAPI, params: NovelRecommendedA
         if not hasattr(result, 'novels') or not result.novels:
             return "没有找到推荐小说。"
 
-        novels = [_parse_novel(novel) for novel in result.novels[:params.limit]]
+        novels = [_parse_novel(novel) for novel in result.novels[:params.count]]
         return _render_novel_cards(novels, params.sort_by_bookmarks, params.top_n)
 
     except Exception as e:
@@ -256,16 +256,6 @@ async def get_current_time(params: GetCurrentTimeParams) -> Dict[str, Any]:
     now = datetime.now(timezone.utc)
     local_now = datetime.now()
 
-    # 计算常用的时间范围
-    two_years_ago = now.replace(year=now.year - 2, month=1, day=1)
-    one_year_ago = now.replace(year=now.year - 1, month=1, day=1)
-    current_year_start = now.replace(month=1, day=1)
-
-    recommended_two_years_search = {
-        "start_date": two_years_ago.strftime("%Y-%m-%d"),
-        "end_date": now.strftime("%Y-%m-%d")
-    }
-
     return {
         "current_utc": now.isoformat(),
         "current_local": local_now.isoformat(),
@@ -274,23 +264,5 @@ async def get_current_time(params: GetCurrentTimeParams) -> Dict[str, Any]:
         "current_month": now.month,
         "current_day": now.day,
         "timezone_info": str(local_now.astimezone().tzinfo),
-        "IMPORTANT_MESSAGE": f"今天是 {now.strftime('%Y-%m-%d')}，请使用以下日期进行搜索",
-        "recommended_search_params_for_two_years": recommended_two_years_search,
-        "suggested_date_ranges": {
-            "last_two_years": {
-                "start_date": two_years_ago.strftime("%Y-%m-%d"),
-                "end_date": now.strftime("%Y-%m-%d"),
-                "description": "过去两年"
-            },
-            "last_year": {
-                "start_date": one_year_ago.strftime("%Y-%m-%d"),
-                "end_date": now.strftime("%Y-%m-%d"),
-                "description": "过去一年"
-            },
-            "current_year": {
-                "start_date": current_year_start.strftime("%Y-%m-%d"),
-                "end_date": now.strftime("%Y-%m-%d"),
-                "description": "今年至今"
-            }
-        }
+        "IMPORTANT_MESSAGE": f"今天是 {now.strftime('%Y-%m-%d')}"
     }

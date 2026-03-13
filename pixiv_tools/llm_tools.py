@@ -212,8 +212,7 @@ class GetCurrentTimeTool(FunctionTool[AstrAgentContext]):
 
     name: str = "get_current_time"
     description: str = (
-        "获取当前时间信息，包括当前日期、时区信息以及常用的时间范围建议"
-        "（如过去两年、过去一年等）"
+        "获取当前时间信息，包括当前日期、时区信息等"
     )
     parameters: dict = Field(
         default_factory=lambda: GetCurrentTimeParams.model_json_schema()
