@@ -1,6 +1,6 @@
 name: astrbot_plugin_pixiv_tools
 display_name: Pixiv Tools
 desc: 提供 Pixiv 小说搜索、推荐、格式化等 LLM 工具，基于 pixiv-mcp 项目和 astrbot_plugin_pixiv_reborn 项目移植。
-version: v1.0.1
+version: v1.0.2
 author: RoadToNowhereX
 repo: ""
