@@ -124,6 +124,15 @@ def _render_novel_cards(novels: List[Dict[str, Any]], sort_by_bookmarks: bool = 
         # 作者
         card_html += f'  <div style="margin-bottom: 8px;"><b>👤 作者：</b><a href="{author_link}" target="_blank" style="text-decoration: none;">{author_name}</a></div>\n'
 
+        # 获取图片 URL 并转换为反代 URL
+        image_urls = novel.get("image_urls", {})
+        cover_url = image_urls.get("large") or image_urls.get("medium") or ""
+        proxied_cover_url = _get_proxied_image_url(cover_url)
+
+        # 封面图片（如果有）显示在作者与标签之间
+        if proxied_cover_url:
+            card_html += f'  <div style="margin-bottom: 12px;"><img src="{proxied_cover_url}" alt="封面" style="max-width: 100%; max-height: 250px; border-radius: 6px; object-fit: contain; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>\n'
+
         # 标签
         tags_html = " ".join(tag_links)
         card_html += f'  <div style="margin-bottom: 12px;"><b>🏷️ 标签：</b>{tags_html}</div>\n'
@@ -141,12 +150,25 @@ def _render_novel_cards(novels: List[Dict[str, Any]], sort_by_bookmarks: bool = 
     return "\n\n---\n\n".join(cards)
 
 
+def _get_proxied_image_url(url: str) -> str:
+    """将原始 Pixiv 图片 URL 转换为反代 URL 以绕过防盗链"""
+    if not url:
+        return ""
+    if "i.pximg.net" in url:
+        return url.replace("i.pximg.net", "i.pixiv.re")
+    return url
+
+
 def _parse_novel(novel) -> Dict[str, Any]:
     """将 pixivpy3 的 novel 对象转为字典"""
     return {
         "id": novel.id,
         "title": novel.title,
         "caption": novel.caption,
+        "image_urls": {
+            "large": getattr(novel.image_urls, "large", ""),
+            "medium": getattr(novel.image_urls, "medium", ""),
+        } if hasattr(novel, "image_urls") else {},
         "user": {
             "id": novel.user.id,
             "name": novel.user.name,
