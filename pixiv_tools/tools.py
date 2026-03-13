@@ -108,42 +108,48 @@ def _render_novel_cards(novels: List[Dict[str, Any]], sort_by_bookmarks: bool = 
         work_link = f"https://www.pixiv.net/novel/show.php?id={novel_id}"
         author_link = f"https://www.pixiv.net/users/{author_id}"
 
-        # 构建HTML卡片
-        card_html = '<div style="border: 1px solid rgba(128,128,128,0.3); border-radius: 10px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">\n'
-
-        # 系列行（仅在有系列时显示）
-        if series_info and series_info.get("id"):
-            series_id = series_info.get("id", "")
-            series_title = series_info.get("title", "")
-            series_link = f"https://www.pixiv.net/novel/series/{series_id}"
-            card_html += f'  <div style="margin-bottom: 8px;"><b>📚 系列：</b><a href="{series_link}" target="_blank" style="text-decoration: none; color: gray;">{series_title}</a></div>\n'
-
-        # 标题
-        card_html += f'  <h3 style="margin: 0 0 12px 0;"><a href="{work_link}" target="_blank" style="text-decoration: none; color: black;">{title}</a></h3>\n'
-
-        # 作者
-        card_html += f'  <div style="margin-bottom: 8px;"><b>👤 作者：</b><a href="{author_link}" target="_blank" style="text-decoration: none;">{author_name}</a></div>\n'
-
         # 获取图片 URL 并转换为反代 URL
         image_urls = novel.get("image_urls", {})
         cover_url = image_urls.get("large") or image_urls.get("medium") or ""
         proxied_cover_url = _get_proxied_image_url(cover_url)
 
-        # 封面图片（如果有）显示在作者与标签之间
+        # 构建HTML卡片 (Flexbox左右布局)
+        card_html = '<div style="border: 1px solid rgba(128,128,128,0.3); border-radius: 10px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); display: flex; gap: 16px; align-items: flex-start;">\n'
+
+        # ================= 左侧：封面和收藏数 =================
+        card_html += '  <div style="flex: 0 0 120px; display: flex; flex-direction: column; gap: 8px; align-items: center;">\n'
+        # 封面图片
         if proxied_cover_url:
-            card_html += f'  <div style="margin-bottom: 12px;"><img src="{proxied_cover_url}" alt="封面" style="max-width: 100%; max-height: 250px; border-radius: 6px; object-fit: contain; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>\n'
+            card_html += f'    <img src="{proxied_cover_url}" alt="封面" style="width: 100%; border-radius: 6px; object-fit: contain; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">\n'
+        # 收藏数
+        card_html += f'    <div style="font-size: 0.9em; text-align: center;">❤️ 收藏：{total_bookmarks}</div>\n'
+        card_html += '  </div>\n'
+
+        # ================= 右侧：标题、系列名、作者、标签、简介 =================
+        card_html += '  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;">\n'
+        
+        # 系列行（放置在最上方，仅在有系列时显示）
+        if series_info and series_info.get("id"):
+            series_id = series_info.get("id", "")
+            series_title = series_info.get("title", "")
+            series_link = f"https://www.pixiv.net/novel/series/{series_id}"
+            card_html += f'    <div style="font-size: 0.9em; word-break: break-all;"><b>📚 系列：</b><a href="{series_link}" target="_blank" style="text-decoration: none; color: gray;">{series_title}</a></div>\n'
+        
+        # 标题
+        card_html += f'    <h3 style="margin: 0; font-size: 1.1em;"><a href="{work_link}" target="_blank" style="text-decoration: none; color: black; word-break: break-all;">{title}</a></h3>\n'
+
+        # 作者
+        card_html += f'    <div style="font-size: 0.9em; word-break: break-all;"><b>👤 作者：</b><a href="{author_link}" target="_blank" style="text-decoration: none; color: #337ab7;">{author_name}</a></div>\n'
 
         # 标签
         tags_html = " ".join(tag_links)
-        card_html += f'  <div style="margin-bottom: 12px;"><b>🏷️ 标签：</b>{tags_html}</div>\n'
-
-        # 收藏数
-        card_html += f'  <div style="margin-bottom: 8px;">❤️ 收藏：{total_bookmarks}</div>\n'
+        card_html += f'    <div style="font-size: 0.9em; line-height: 1.6; word-break: break-all;"><b>🏷️ 标签：</b>{tags_html}</div>\n'
 
         # 简介（可折叠）
         if caption:
-            card_html += f'  <details><summary style="cursor: pointer;"><b>📝 点击展开简介</b></summary><div style="margin-top: 10px; padding: 12px; background-color: rgba(128,128,128,0.08); border-radius: 8px; white-space: pre-wrap; line-height: 1.6; font-size: 0.95em;">{caption}</div></details>\n'
+            card_html += f'    <details style="font-size: 0.9em;"><summary style="cursor: pointer; color: #555;"><b>📝 点击展开简介</b></summary><div style="margin-top: 8px; padding: 10px; background-color: rgba(128,128,128,0.08); border-radius: 8px; white-space: pre-wrap; line-height: 1.5; word-break: break-word;">{caption}</div></details>\n'
 
+        card_html += '  </div>\n'
         card_html += '</div>'
         cards.append(card_html)
 
