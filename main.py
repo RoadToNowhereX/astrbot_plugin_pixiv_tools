@@ -28,8 +28,14 @@ class PixivToolsPlugin(Star):
             )
             return
 
+        # 读取刷新间隔配置
+        refresh_interval = self.config.get("refresh_token_interval_minutes", 60)
+
         # 初始化 API 管理器
-        self.api_manager = PixivApiManager(refresh_token)
+        self.api_manager = PixivApiManager(refresh_token, refresh_interval)
+
+        # 启动后台 Token 自动刷新任务
+        self.api_manager.start_refresh_task()
 
         # 创建并注册 LLM 工具
         self.llm_tools = create_pixiv_novel_tools(self.api_manager)
@@ -43,4 +49,7 @@ class PixivToolsPlugin(Star):
 
     async def terminate(self):
         """插件停用时的清理"""
+        # 停止后台刷新任务
+        if self.api_manager:
+            await self.api_manager.stop_refresh_task()
         logger.info("Pixiv Tools 插件已停用。")
