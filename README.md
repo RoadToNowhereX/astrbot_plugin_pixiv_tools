@@ -1,14 +1,17 @@
-# astrbot-plugin-helloworld
+# astrbot_plugin_pixiv_tools
 
-AstrBot 插件模板 / A template plugin for AstrBot plugin feature
+一座屎山，Antigravity的免费额度在上面自由自在地尽情拉屎。
 
-> [!NOTE]
-> This repo is just a template of [AstrBot](https://github.com/AstrBotDevs/AstrBot) Plugin.
-> 
-> [AstrBot](https://github.com/AstrBotDevs/AstrBot) is an agentic assistant for both personal and group conversations. It can be deployed across dozens of mainstream instant messaging platforms, including QQ, Telegram, Feishu, DingTalk, Slack, LINE, Discord, Matrix, etc. In addition, it provides a reliable and extensible conversational AI infrastructure for individuals, developers, and teams. Whether you need a personal AI companion, an intelligent customer support agent, an automation assistant, or an enterprise knowledge base, AstrBot enables you to quickly build AI applications directly within your existing messaging workflows.
+适用于AstrBot的Pixiv插件，从[pixiv-mcp](https://github.com/DiLiuNEUexpresscompany/pixiv-mcp)和[astrbot_plugin_pixiv_reborn](https://github.com/vmoranv-reborn/astrbot_plugin_pixiv_reborn)项目迁移了重要功能。
 
-# Supports
+使用前需要先获取PIXIV_REFRESH_TOKEN，获取方法请参考[Pixiv OAuth Flow](https://gist.github.com/ZipFile/c9ebedb224406f4f11845ab700124362)。
 
-- [AstrBot Repo](https://github.com/AstrBotDevs/AstrBot)
-- [AstrBot Plugin Development Docs (Chinese)](https://docs.astrbot.app/dev/star/plugin-new.html)
-- [AstrBot Plugin Development Docs (English)](https://docs.astrbot.app/en/dev/star/plugin-new.html)
+## 功能
+以函数工具形式实现
+- 自动刷新PIXIV_REFRESH_TOKEN
+- 按标签和时间范围搜索小说
+- 获取小说推荐
+- 对获取到的结果按收藏数降序排序
+- 将结果直接渲染为HTML卡片发送到AstrBot，可以在支持的前端上显示
+
+
