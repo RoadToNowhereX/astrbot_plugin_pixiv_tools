@@ -143,11 +143,11 @@ def _render_novel_cards(novels: List[Dict[str, Any]], sort_by_bookmarks: bool = 
 
         # 标签
         tags_html = " ".join(tag_links)
-        card_html += f'    <div style="font-size: 0.7em; line-height: 1.4; word-break: break-all;"><b>🏷️ 标签：</b>{tags_html}</div>\n'
+        card_html += f'    <div style="font-size: 0.8em; line-height: 1.4; word-break: break-all;"><b>🏷️ 标签：</b>{tags_html}</div>\n'
 
         # 简介（可折叠）
         if caption:
-            card_html += f'    <details style="font-size: 0.7em;"><summary style="cursor: pointer; color: #555;"><b>📝 点击展开简介</b></summary><div style="margin-top: 8px; padding: 10px; background-color: rgba(128,128,128,0.08); border-radius: 8px; white-space: pre-wrap; line-height: 1.5; word-break: break-word;">{caption}</div></details>\n'
+            card_html += f'    <details style="font-size: 0.8em;"><summary style="cursor: pointer; color: #555;"><b>📝 点击展开简介</b></summary><div style="margin-top: 8px; padding: 10px; background-color: rgba(128,128,128,0.08); border-radius: 8px; white-space: pre-wrap; line-height: 1.5; word-break: break-word;">{caption}</div></details>\n'
 
         card_html += '  </div>\n'
         card_html += '</div>'
