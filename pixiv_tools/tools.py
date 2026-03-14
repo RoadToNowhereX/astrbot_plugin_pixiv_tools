@@ -20,8 +20,8 @@ class SearchNovelParams(BaseModel):
         description="搜索类型: partial_match_for_tags(标签部分匹配), exact_match_for_tags(标签完全匹配), text(正文), keyword(关键词)"
     )
     sort: str = Field(default="date_desc", description="排序方式: date_desc(最新), date_asc(最旧)")
-    start_date: Optional[str] = Field(default=None, description="开始日期，格式为: YYYY-MM-DD")
-    end_date: Optional[str] = Field(default=None, description="结束日期，格式为: YYYY-MM-DD")
+    start_date: Optional[str] = Field(default=None, description="搜索的时间范围起点，格式: YYYY-MM-DD (如 2026-03-06)。如果需要按范围过滤，强烈要求填入正确的日期字符串，绝对不能传null")
+    end_date: Optional[str] = Field(default=None, description="搜索的时间范围终点，格式: YYYY-MM-DD (如 2026-03-13)。如果需要按范围过滤，强烈要求填入正确的日期字符串，绝对不能传null")
     count: int = Field(default=20, description="返回结果数，默认为20", ge=1, le=100)
 
 
@@ -44,8 +44,8 @@ class SearchNovelAndSendParams(BaseModel):
         description="搜索类型: partial_match_for_tags(标签部分匹配), exact_match_for_tags(标签完全匹配), text(正文), keyword(关键词)"
     )
     sort: str = Field(default="date_desc", description="排序方式: date_desc(最新), date_asc(最旧)")
-    start_date: Optional[str] = Field(default=None, description="开始日期，格式为: YYYY-MM-DD")
-    end_date: Optional[str] = Field(default=None, description="结束日期，格式为: YYYY-MM-DD")
+    start_date: Optional[str] = Field(default=None, description="搜索的时间范围起点，格式: YYYY-MM-DD (如 2026-03-06)。如果需要按范围过滤，强烈要求填入正确的日期字符串，绝对不能传null")
+    end_date: Optional[str] = Field(default=None, description="搜索的时间范围终点，格式: YYYY-MM-DD (如 2026-03-13)。如果需要按范围过滤，强烈要求填入正确的日期字符串，绝对不能传null")
     count: int = Field(default=20, description="从API获取的结果数，默认为20", ge=1, le=100)
     sort_by_bookmarks: bool = Field(default=True, description="是否按收藏数从高到低排序，默认为True")
     top_n: int = Field(default=20, description="排序后最多显示的结果数量，默认为20", ge=1)
