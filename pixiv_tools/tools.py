@@ -145,21 +145,9 @@ def _render_novel_cards(novels: List[Dict[str, Any]], sort_by_bookmarks: bool = 
         tags_html = " ".join(tag_links)
         card_html += f'    <div style="font-size: 0.9em; line-height: 1.6; word-break: break-all;"><b>🏷️ 标签：</b>{tags_html}</div>\n'
 
-        # 简介（弹出方框）
+        # 简介（可折叠）
         if caption:
-            modal_id = f"modal_{novel_id}"
-            card_html += f"""    <div style="font-size: 0.9em;">
-      <div style="cursor: pointer; color: #555; display: inline-block;" onclick="document.getElementById('{modal_id}').style.display='flex'"><b>📝 点击查看简介</b></div>
-      <div id="{modal_id}" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;" onclick="this.style.display='none'">
-        <div style="background: white; padding: 20px; border-radius: 16px; width: 85%; max-width: 500px; max-height: 70vh; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" onclick="event.stopPropagation()">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-            <span style="font-weight: bold; font-size: 1.1em; color: black;">小说简介</span>
-            <span style="cursor: pointer; font-size: 1.5em; color: #999; line-height: 1;" onclick="document.getElementById('{modal_id}').style.display='none'">&times;</span>
-          </div>
-          <div style="white-space: pre-wrap; line-height: 1.6; color: #333; word-break: break-word; font-size: 14px;">{caption}</div>
-        </div>
-      </div>
-    </div>\n"""
+            card_html += f'    <details style="font-size: 0.9em;"><summary style="cursor: pointer; color: #555;"><b>📝 点击展开简介</b></summary><div style="margin-top: 8px; padding: 10px; background-color: rgba(128,128,128,0.08); border-radius: 8px; white-space: pre-wrap; line-height: 1.5; word-break: break-word;">{caption}</div></details>\n'
 
         card_html += '  </div>\n'
         card_html += '</div>'
